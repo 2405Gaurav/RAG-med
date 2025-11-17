@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Upload, File, CheckCircle, AlertCircle, X, Zap, Activity } from "lucide-react";
+import { Upload, File, CheckCircle, AlertCircle, X,Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../lib/api-client.js"
 import { UPLOAD_PDF } from "../utils/constants.js"

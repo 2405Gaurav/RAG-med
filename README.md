@@ -1,163 +1,118 @@
 MedRAG-Agent: A Multi-Agent, Knowledge Graph-Enhanced RAG Framework for High-Fidelity Medical Query Resolution
 
-This repository contains the implementation of MedRAG-Agent, a state-of-the-art multi-agent Retrieval-Augmented Generation (RAG) system designed to significantly improve medical question-answering fidelity, reduce hallucinations, and enhance reasoning transparency.
+This repository contains the implementation of MedRAG-Agent, a state-of-the-art multi-agent Retrieval-Augmented Generation (RAG) system designed to improve the accuracy, faithfulness, and clinical reliability of medical question answering.
 
-MedRAG-Agent integrates:
+MedRAG-Agent integrates a biomedical Knowledge Graph, four specialized collaborative agents, and a hybrid medical knowledge base built from PubMed and MedlinePlus to overcome the “retrieval challenge” that limits traditional RAG systems.
 
-A Knowledge Graph (KG) for structured medical reasoning
+🚀 Key Features
+✔ Multi-Agent Architecture
 
-A Multi-Agent Architecture for decomposed, human-like decision-making
+MedRAG-Agent uses four specialized agents:
 
-A Hybrid Medical Knowledge Base created from PubMed and MedlinePlus
+Query Decomposer Agent – Breaks complex medical questions into structured sub-queries.
 
-Verification-driven answer generation to ensure factual grounding
+Knowledge Graph Navigator Agent – Navigates biomedical entities & relationships using a UMLS-aligned knowledge graph.
 
-This project is based on the research work:
-“MedRAG-Agent: A Multi-Agent, Knowledge Graph-Enhanced RAG Framework for High-Fidelity Medical Query Resolution”
-Authored by Vikas, Gaurav, Ashmit & Shivam 
+Document Retriever Agent – Performs targeted retrieval using MedCPT embeddings + FAISS vector search.
 
-RAG_BASED_MEDICAL_QUERY (1)
+Synthesizer & Verifier Agent – Generates answers and verifies each statement against retrieved evidence.
 
-.
+🧠 Why This System?
 
-📌 Key Features
-✅ 1. Multi-Agent RAG Pipeline
+Traditional LLMs hallucinate and rely on outdated training knowledge.
 
-MedRAG-Agent uses four specialized intelligent agents:
+Standard RAG fails when retrieval returns noisy or irrelevant information.
 
-Query Decomposer Agent
-Breaks a complex medical query into simpler sub-questions.
+MedRAG-Agent improves retrieval precision, multi-hop reasoning, and faithfulness.
 
-Knowledge Graph Navigator Agent
-Uses a biomedical KG (UMLS-aligned) to identify entities & relationships to narrow the search space.
-
-Document Retriever Agent
-Retrieves the top evidence chunks using MedCPT embeddings + FAISS.
-
-Synthesizer & Verifier Agent
-Produces the final answer AND verifies every claim with citations — reducing hallucinations by ~15%.
-
-✅ 2. Knowledge Graph–Enhanced Retrieval
-
-Instead of relying solely on vector similarity, the system uses a KG to:
-
-Guide retrieval
-
-Reduce noise
-
-Improve relevance
-
-Support multi-hop reasoning
-
-This directly addresses the “retrieval challenge” in medical RAG systems 
-
-RAG_BASED_MEDICAL_QUERY (1)
-
-.
-
-✅ 3. Hybrid Medical Knowledge Base
-
-Constructed from:
-
-PubMed abstracts (latest biomedical research)
-
-MedlinePlus corpus (medically verified public health info)
-
-Includes:
-
-Structure-aware chunking
-
-Named Entity Recognition
-
-UMLS-based relation normalization
-
-✅ 4. State-of-the-Art Performance (MedQA / MIRAGE Benchmark)
+📊 Performance (MedQA / MIRAGE Benchmark)
 Model	Accuracy	Faithfulness	Completeness
 MedRAG-Agent	78.5%	95.2%	4.45/5
 Vanilla RAG	66.5%	82.5%	3.90
 i-MedRAG	4.15	88.1%	4.20
 KG-RAG	4.05	91.3%	4.10
 
-Results sourced from the MedRAG-Agent evaluation in the paper 
+Ablation studies confirm the KG Navigator and Verifier Agent as the highest contributors to performance improvements.
 
-RAG_BASED_MEDICAL_QUERY (1)
-
-.
-
-🧠 Architecture Overview
+🏗️ System Architecture
 User Query
-     ↓
+    ↓
 [1] Query Decomposer Agent
-     ↓
-[2] KG Navigator Agent
-     ↓
+    ↓
+[2] Knowledge Graph Navigator Agent
+    ↓
 [3] Document Retriever Agent (MedCPT + FAISS)
-     ↓
+    ↓
 [4] Synthesizer & Verifier Agent
-     ↓
-Final Answer (Cited, Verified, Faithful)
+    ↓
+Final Verified, Cited Medical Answer
 
+🧩 Knowledge Base Construction
 
-This design mimics how clinicians approach complex reasoning tasks.
+PubMed abstracts (latest scientific biomedical research)
+
+MedlinePlus medical articles (verified public health information)
+
+Structure-aware chunking
+
+Named entity extraction
+
+UMLS-based relationship normalization
 
 🛠️ Tech Stack
-Core AI Components
 
-MedCPT biomedical embedding model
+LLMs: GPT-4o / Claude 3.5 Sonnet (for reasoning & verification)
 
-Large Language Models (GPT-4o / Claude 3.5 Sonnet)
+Embeddings: MedCPT (biomedical domain-adapted)
 
-FAISS vector search
+Vector Search: FAISS
 
-KG + NLP
+Agent Framework: LangChain
 
-UMLS mapping
+Backend: Node.js / Express
 
-Named Entity Recognition
+Database: Qdrant (or FAISS local)
 
-Knowledge graph construction
+Docker: For vector DB deployment
 
-Frameworks
-
-LangChain for agent orchestration
-
-Node.js / Express backend server
-
-Docker + Qdrant/FAISS environment
-
-🚀 Getting Started
-1. Clone Repository
+📥 Getting Started
+1. Clone the Repository
 git clone <repository-url>
 cd medrag-agent
 
 2. Install Dependencies
 npm install
 
-3. Setup Environment Variables
-LLM_API_KEY=YOUR_MODEL_API_KEY
+3. Configure Environment Variables
+
+Create a .env file:
+
+LLM_API_KEY=YOUR_API_KEY
 QDRANT_URL=http://localhost:6333
 PORT=3000
 
-4. Start Vector DB
+4. Start Vector Database
 docker-compose -f docker-compose.db.yml up -d
 
 5. Run Development Server
 npm run dev
 
-📘 API Endpoints
-1. Submit Medical Query
-
+🔌 API Endpoints
+1. Submit a Medical Query
 POST /api/medrag/query
+
+
+Example request:
 
 {
   "query": "What are the complications of untreated hyperthyroidism?"
 }
 
-2. Load Medical Corpus
-
+2. Upload Medical Knowledge Text
 POST /api/medrag/upload
 
-Uploads structured or unstructured text (PubMed, MedlinePlus).
+
+Supports structured/unstructured medical corpus files.
 
 📂 Project Structure
 .
@@ -177,43 +132,18 @@ Uploads structured or unstructured text (PubMed, MedlinePlus).
 ├── tsconfig.json
 └── README.md
 
-📈 Ablation Insights
-
-Removing agents yields significant drops:
-
-Removed Component	Accuracy	Faithfulness
-KG Navigator	3.85	88.1%
-Verifier Agent	4.25	85.9%
-Query Decomposer	4.12	93.5%
-
-This confirms the critical role of KG grounding and verification 
-
-RAG_BASED_MEDICAL_QUERY (1)
-
-.
-
-🧪 Benchmarking
-
-Dataset: MedQA (USMLE)
-
-Evaluation Suite: MIRAGE Benchmark
-
-Metrics:
-
-Answer Accuracy
-
-Faithfulness
-
-Completeness
-
+🔬 Ablation Study Summary
+Configuration	Accuracy	Faithfulness
+Full System	4.30	95.2%
+Without Verifier Agent	4.25	85.9%
+Without Query Decomposer	4.12	93.5%
+Without KG Navigator	3.85	88.1%
 🧭 Future Work
 
-As described in the paper:
+Add multimodal capability (radiology, pathology, lab values).
 
-Add multimodal RAG (radiology images, pathology slides)
+Automated real-time biomedical knowledge updates.
 
-Connect lab results, EHR data, genomics
+Integrate with EHR systems for clinical use.
 
-Real-time dynamic knowledge updates
-
-Deployment in clinical environments
+Conduct clinical user studies with physicians.

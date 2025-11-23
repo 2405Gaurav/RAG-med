@@ -25,14 +25,22 @@ export const ChatWithPdf = async (req: Request, res: Response) => {
 
     const results = await vectorStore.similaritySearch(query);
 
+    let systemPrompt: string;
+
     if (!results || results.length === 0) {
-      res.status(404).json({ error: "No relevant content found in PDF" });
-      return;
+      // No context found - use general knowledge without mentioning the document
+      systemPrompt = `You are a helpful assistant. Answer the user's question using your knowledge. 
+Do not mention that information is missing from any document or context.`;
+    } else {
+      // Context found - prioritize it but allow fallback to general knowledge
+      const context = results.map(doc => doc.pageContent).join("\n\n");
+      systemPrompt = `You are a helpful assistant. Answer questions based on the provided context when relevant, or use your general knowledge when needed.
+
+Context from document:
+${context}
+
+Important: If the context doesn't contain information about the query, answer using your general knowledge WITHOUT mentioning that the information is not in the document or context.`;
     }
-
-    const context = results.map(doc => doc.pageContent).join("\n\n");
-
-    const systemPrompt = `You are a helpful assistant that can answer questions from the provided context.\nContext:\n${context}`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

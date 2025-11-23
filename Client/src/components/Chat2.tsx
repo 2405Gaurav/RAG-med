@@ -485,3 +485,12 @@ const UnifiedMedRAGChat: React.FC = () => {
 };
 
 export default UnifiedMedRAGChat;
+
+
+
+// User query → Query Decomposer →
+//  KG Navigator (find entities & constrain search) → 
+// Retriever (vector DB + dense search) → 
+// Synthesizer & Verifier (LLM synthesizes + cross-checks evidence) '
+// → return answer with inline citations and provenance to frontend. 
+// This is exactly the MedRAG-Agent pipeline described in your paper

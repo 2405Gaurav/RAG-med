@@ -1,32 +1,55 @@
-export async function POST(request) {
+// Types
+interface SubQuery {
+  query: string;
+  type: string;
+  priority: number;
+}
+
+interface DecomposeRequest {
+  query: string;
+}
+
+// Main function to handle POST requests
+export async function POST(request: Request): Promise<Response> {
   try {
-    const { query } = await request.json();
+    const body: DecomposeRequest = await request.json();
+    const query = body?.query;
 
     if (!query || typeof query !== 'string') {
-      return Response.json(
-        { error: 'Valid query string is required' },
+      return new Response(
+        JSON.stringify({ error: 'Valid query string is required' }),
         { status: 400 }
       );
     }
 
     const subQueries = decomposeQuery(query);
 
-    return Response.json({
-      success: true,
-      originalQuery: query,
-      subQueries: subQueries,
-    });
-  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        originalQuery: query,
+        subQueries: subQueries
+      }),
+      { status: 200 }
+    );
+  } catch (error: any) {
     console.error('Query decomposition error:', error);
-    return Response.json(
-      { error: 'Failed to decompose query', details: error.message },
+
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to decompose query',
+        details: error.message
+      }),
       { status: 500 }
     );
   }
 }
 
-function decomposeQuery(query) {
-  const subQueries = [];
+// ----------------------------------------------------
+//   Query Decomposition Logic
+// ----------------------------------------------------
+function decomposeQuery(query: string): SubQuery[] {
+  const subQueries: SubQuery[] = [];
   const lowerQuery = query.toLowerCase();
 
   const patterns = [
@@ -37,10 +60,10 @@ function decomposeQuery(query) {
     { keywords: ['prevent', 'prevention', 'avoid'], type: 'prevention' },
     { keywords: ['diagnosis', 'how to diagnose', 'test for'], type: 'diagnosis' },
     { keywords: ['prognosis', 'outcome', 'recovery'], type: 'prognosis' },
-    { keywords: ['risk factors', 'who gets'], type: 'risk_factors' },
+    { keywords: ['risk factors', 'who gets'], type: 'risk_factors' }
   ];
 
-  const detectedTypes = new Set();
+  const detectedTypes = new Set<string>();
 
   for (const pattern of patterns) {
     for (const keyword of pattern.keywords) {
@@ -129,7 +152,7 @@ function decomposeQuery(query) {
 
   if (subQueries.length === 0) {
     subQueries.push({
-      query: query,
+      query,
       type: 'general',
       priority: 1
     });
@@ -138,15 +161,19 @@ function decomposeQuery(query) {
   return subQueries.sort((a, b) => a.priority - b.priority);
 }
 
-function extractMedicalCondition(query) {
+// ----------------------------------------------------
+//   Extract the medical condition
+// ----------------------------------------------------
+function extractMedicalCondition(query: string): string | null {
   const patterns = [
     /(?:what is|what are|define|about)\s+([a-z\s]+?)(?:\?|$|symptoms|treatment|causes)/i,
     /(?:symptoms of|causes of|treatment for|diagnose|prevent)\s+([a-z\s]+?)(?:\?|$)/i,
-    /^([a-z\s]+?)(?:\s+symptoms|\s+treatment|\s+causes)?$/i,
+    /^([a-z\s]+?)(?:\s+symptoms|\s+treatment|\s+causes)?$/i
   ];
 
   for (const pattern of patterns) {
     const match = query.match(pattern);
+
     if (match && match[1]) {
       const condition = match[1].trim();
       if (condition.length > 2 && condition.length < 50) {
